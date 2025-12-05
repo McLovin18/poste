@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminFirestore } from '@/lib/firebaseAdmin';
-import admin from '@/lib/firebaseAdmin';
+import { getAdminFirestore, getAdmin } from '@/lib/firebaseAdmin';
 import { PDFDocument as PDFLib, StandardFonts, rgb } from 'pdf-lib';
 
 async function fetchImageBuffer(url: string) {
@@ -119,11 +118,13 @@ export async function GET() {
     let usedAdmin = false;
 
     // Prefer Admin SDK when available (production / when credentials provided)
+    const admin = getAdmin();
     if (admin && admin.apps && admin.apps.length > 0) {
       try {
+        const adminFs = getAdminFirestore();
         const startTs = admin.firestore.Timestamp.fromDate(start);
         const endTs = admin.firestore.Timestamp.fromDate(end);
-        const snap = await adminFirestore.collection('postes')
+        const snap = await adminFs.collection('postes')
           .where('fecha', '>=', startTs)
           .where('fecha', '<=', endTs)
           .get();
