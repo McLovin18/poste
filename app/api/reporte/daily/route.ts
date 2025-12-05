@@ -17,7 +17,8 @@ async function fetchImageBuffer(url: string) {
 
 async function createDiagnosticPdfBytes(message: string) {
   const pdfDoc = await PDFLib.create();
-  const page = pdfDoc.addPage([595, 842]);
+  const PAGE_SIZE: [number, number] = [595, 842];
+  const page = pdfDoc.addPage(PAGE_SIZE);
   const times = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontSize = 12;
   const lines = String(message).split('\n');
@@ -38,8 +39,8 @@ async function createDiagnosticPdfBytes(message: string) {
 async function createReportPdfBytes(posts: any[], dateLabel: string) {
   const pdfDoc = await PDFLib.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const pageSize = [595, 842];
-  let page = pdfDoc.addPage(pageSize);
+  const PAGE_SIZE: [number, number] = [595, 842];
+  let page = pdfDoc.addPage(PAGE_SIZE);
   const margin = 50;
   let x = margin;
   let y = page.getHeight() - margin;
@@ -57,7 +58,7 @@ async function createReportPdfBytes(posts: any[], dateLabel: string) {
       const p = posts[i];
       const title = `${i + 1}. ID: ${p.id_registro || p.id || '-'}  Nombre: ${p.nombre || '-'} `;
       if (y < margin + 100) {
-        page = pdfDoc.addPage(pageSize);
+        page = pdfDoc.addPage(PAGE_SIZE);
         y = page.getHeight() - margin;
       }
       page.drawText(title, { x, y, size: 12, font });
@@ -89,7 +90,7 @@ async function createReportPdfBytes(posts: any[], dateLabel: string) {
             }
             const imgDims = img.scale(0.25);
             if (y - imgDims.height < margin) {
-              page = pdfDoc.addPage(pageSize);
+              page = pdfDoc.addPage(PAGE_SIZE);
               y = page.getHeight() - margin;
             }
             page.drawImage(img, { x, y: y - imgDims.height, width: imgDims.width, height: imgDims.height });
