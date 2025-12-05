@@ -4,9 +4,16 @@ import React, { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { signOutUser } = useAuth();
+
+  const handleLogout = async () => {
+    await signOutUser();
+    window.location.href = "/";
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -18,6 +25,15 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           <Link href="/dashboard/postes" className="hover:text-yellow-300">Postes</Link>
           <Link href="/dashboard/reporte" className="hover:text-yellow-300">Reporte diario</Link>
         </nav>
+
+        <div className="mt-auto">
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-3 py-2 rounded-md bg-red-600 hover:bg-red-700"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </aside>
 
       {/* Mobile slide-over Sidebar (keeps existing mobile behaviour) */}

@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export default function Topbar({ onMenu }: { onMenu?: () => void }) {
+  const { signOutUser } = useAuth();
+
+  const handleLogout = async () => {
+    await signOutUser();
+    // redirect to home/login
+    window.location.href = "/";
+  };
+
   return (
     <header className="md:hidden w-full bg-gray-900 text-white p-4 flex justify-between items-center">
       <div className="flex items-center gap-3">
@@ -13,11 +22,21 @@ export default function Topbar({ onMenu }: { onMenu?: () => void }) {
         <h2 className="text-lg font-bold">CNEL Postes</h2>
       </div>
 
-      <nav className="hidden sm:flex gap-4 text-sm">
-        <Link href="/dashboard">Inicio</Link>
-        <Link href="/dashboard/postes">Postes</Link>
-        <Link href="/dashboard/reporte">Reporte</Link>
-      </nav>
+      <div className="flex items-center gap-3">
+        <nav className="hidden sm:flex gap-4 text-sm">
+          <Link href="/dashboard">Inicio</Link>
+          <Link href="/dashboard/postes">Postes</Link>
+          <Link href="/dashboard/reporte">Reporte</Link>
+        </nav>
+
+        <button
+          onClick={handleLogout}
+          className="ml-2 text-sm px-3 py-1 rounded-md bg-red-600 hover:bg-red-700"
+          aria-label="Cerrar sesión"
+        >
+          Cerrar sesión
+        </button>
+      </div>
     </header>
   );
 }

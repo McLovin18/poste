@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { X } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export default function Sidebar({
   isOpen = true,
@@ -9,6 +10,13 @@ export default function Sidebar({
   isOpen?: boolean;
   onClose?: () => void;
 }) {
+  const { signOutUser } = useAuth();
+
+  const handleLogout = async () => {
+    if (onClose) onClose();
+    await signOutUser();
+    window.location.href = "/";
+  };
   return (
     <>
       {/* Mobile sidebar ONLY */}
@@ -30,6 +38,14 @@ export default function Sidebar({
             <Link href="/dashboard/postes" onClick={onClose}>Postes</Link>
             <Link href="/dashboard/reporte" onClick={onClose}>Reporte diario</Link>
           </nav>
+          <div className="mt-6">
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-3 py-2 rounded-md bg-red-600 hover:bg-red-700"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </div>
     </>
