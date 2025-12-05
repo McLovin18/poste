@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Any authenticated user can read user docs
+      allow read: if isSignedIn();
+
+      // Users can create their own profile document after registering
+      allow create: if isSignedIn() && request.auth.uid == userId;
+
+      // Users can update or delete their own doc; admins can also update/delete
+      allow update, delete: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Postes collection
+    match /postes/{postId} {
+      // Any authenticated user can read posts
+      allow read: if isSignedIn();
+
+      // Any authenticated user can create a poste; ensure creadoPorUid matches the authenticated UID
+      allow create: if isSignedIn() && request.resource.data.creadoPorUid == request.auth.uid;
+
+      // Only admins can update or delete postes
+      allow update, delete: if isSignedIn() && isAdmin();
+    }
+
+    // Default: deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

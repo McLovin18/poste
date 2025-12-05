@@ -1,0 +1,29 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Regla para archivos de postes: /postes/{postId}/{...}
+    match /postes/{postId}/{allPaths=**} {
+      // Lectura pública (ajusta si quieres restringirla)
+      allow read: if true;
+
+      // --- Desarrollo: regla relajada para desbloquear uploads desde clientes autenticados ---
+      // Permite escritura si el usuario está autenticado y el archivo es una imagen < 10MB.
+      // IMPORTANTE: esto es para desarrollo. En producción deberías exigir metadata.owner == request.auth.uid
+      // o utilizar signed URLs / subida server-side.
+      allow write: if request.auth != null
+                   && request.resource != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+
+      // Borrado: propietario (metadata.owner) o admin si existe el metadata; permitimos admin también.
+      allow delete: if request.auth != null && (resource.metadata.owner == request.auth.uid || request.auth.token.admin == true);
+    }
+
+    // Rechazar por defecto otras rutas
+    match /{allPaths=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}
