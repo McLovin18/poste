@@ -34,6 +34,49 @@ export default function VerPosteModal({ poste, onClose, onEdit }: { poste: any; 
               </div>
             )}
 
+              {poste.itrs && (
+                <div className="text-sm text-gray-600 mt-2">
+                  <p className="font-semibold">Coordenadas ITRS (ECEF)</p>
+                  <p className="text-xs">X: {Number(poste.itrs.x).toFixed(3)}</p>
+                  <p className="text-xs">Y: {Number(poste.itrs.y).toFixed(3)}</p>
+                  <p className="text-xs">Z: {Number(poste.itrs.z).toFixed(3)}</p>
+                </div>
+              )}
+
+              {poste.estructura && (
+                <div className="text-sm text-gray-600 mt-2">
+                  <p className="font-semibold">Estructura</p>
+                  <p>{poste.estructura.codigo}</p>
+                </div>
+              )}
+
+              {poste.luminaria && (
+                <div className="text-sm text-gray-600 mt-2">
+                  <p className="font-semibold">Luminaria</p>
+                  <p>{poste.luminaria.codigo}</p>
+                </div>
+              )}
+
+              {poste.seccionadoresFusible && (
+                <p className="text-sm text-gray-600 mt-2">Seccionadores fusible: {poste.seccionadoresFusible}</p>
+              )}
+
+              {poste.seccionadoresCuchillas && (
+                <p className="text-sm text-gray-600 mt-2">Seccionadores cuchillas: {poste.seccionadoresCuchillas}</p>
+              )}
+
+              {poste.capacitor && (
+                <p className="text-sm text-gray-600 mt-2">Capacitor: {poste.capacitor}</p>
+              )}
+
+              {poste.transformador && (
+                <div className="text-sm text-gray-600 mt-2">
+                  <p className="font-semibold">Transformador</p>
+                  <p>Código: {poste.transformador.codigo}</p>
+                  <p>Fase: {poste.transformador.fase}</p>
+                </div>
+              )}
+
             <p className="text-sm mt-2">Creado por: {user?.email || user?.name || 'Desconocido'}</p>
           </div>
 

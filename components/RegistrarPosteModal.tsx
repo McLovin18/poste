@@ -18,6 +18,16 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
   );
   const [tipoLinea, setTipoLinea] = useState<string>('tramo de media tension aereo');
   const [tipoPoligono, setTipoPoligono] = useState<string>('area servicio');
+  // additional poste fields
+  const [estructuraChecked, setEstructuraChecked] = useState<boolean>(false);
+  const [codigoEstructura, setCodigoEstructura] = useState<string>('');
+  const [luminariaChecked, setLuminariaChecked] = useState<boolean>(false);
+  const [codigoLuminaria, setCodigoLuminaria] = useState<string>('');
+  const [seccionadoresFusible, setSeccionadoresFusible] = useState<string>('');
+  const [seccionadoresCuchillas, setSeccionadoresCuchillas] = useState<string>('');
+  const [capacitor, setCapacitor] = useState<string>('');
+  const [transformadorCodigo, setTransformadorCodigo] = useState<string>('');
+  const [transformadorFase, setTransformadorFase] = useState<string>('');
   const [fotos, setFotos] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -92,9 +102,35 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         tipo: tipoEntidad,
       };
 
-      if (tipoEntidad === 'poste') {
+        if (tipoEntidad === 'poste') {
         optimisticPost.lat = place.lat;
         optimisticPost.lng = place.lng;
+        // compute a simple ITRS (ECEF) representation from lat/lng
+        const lat = Number(place.lat);
+        const lon = Number(place.lng);
+        const toRad = (d: number) => (d * Math.PI) / 180;
+        const a = 6378137.0;
+        const f = 1 / 298.257223563;
+        const e2 = f * (2 - f);
+        const sinLat = Math.sin(toRad(lat));
+        const cosLat = Math.cos(toRad(lat));
+        const sinLon = Math.sin(toRad(lon));
+        const cosLon = Math.cos(toRad(lon));
+        const N = a / Math.sqrt(1 - e2 * sinLat * sinLat);
+        const h = 0; // assume 0 height if not provided
+        const x = (N + h) * cosLat * cosLon;
+        const y = (N + h) * cosLat * sinLon;
+        const z = ((1 - e2) * N + h) * sinLat;
+        optimisticPost.itrs = { x, y, z };
+        // include form fields
+        if (estructuraChecked) optimisticPost.estructura = { codigo: codigoEstructura || 'N/A' };
+        if (luminariaChecked) {
+          optimisticPost.luminaria = { codigo: codigoLuminaria || (codigoEstructura || 'N/A') };
+          if (seccionadoresFusible) optimisticPost.seccionadoresFusible = seccionadoresFusible;
+          if (seccionadoresCuchillas) optimisticPost.seccionadoresCuchillas = seccionadoresCuchillas;
+          if (capacitor) optimisticPost.capacitor = capacitor;
+          if (transformadorCodigo || transformadorFase) optimisticPost.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
+        }
       } else if (tipoEntidad === 'linea') {
         optimisticPost.geometry = { type: 'LineString', coordinates: place || [] };
         optimisticPost.subtipo = tipoLinea;
@@ -137,6 +173,36 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         docData.id_registro = usedId;
         docData.lat = place.lat;
         docData.lng = place.lng;
+        // compute and store ITRS (ECEF) coordinates
+        try {
+          const lat = Number(place.lat);
+          const lon = Number(place.lng);
+          const toRad = (d: number) => (d * Math.PI) / 180;
+          const a = 6378137.0;
+          const f = 1 / 298.257223563;
+          const e2 = f * (2 - f);
+          const sinLat = Math.sin(toRad(lat));
+          const cosLat = Math.cos(toRad(lat));
+          const sinLon = Math.sin(toRad(lon));
+          const cosLon = Math.cos(toRad(lon));
+          const N = a / Math.sqrt(1 - e2 * sinLat * sinLat);
+          const h = 0;
+          const x = (N + h) * cosLat * cosLon;
+          const y = (N + h) * cosLat * sinLon;
+          const z = ((1 - e2) * N + h) * sinLat;
+          docData.itrs = { x, y, z };
+        } catch (e) {
+          // ignore
+        }
+        // add additional poste fields
+        if (estructuraChecked) docData.estructura = { codigo: codigoEstructura || 'N/A' };
+        if (luminariaChecked) {
+          docData.luminaria = { codigo: codigoLuminaria || (codigoEstructura || 'N/A') };
+          if (seccionadoresFusible) docData.seccionadoresFusible = seccionadoresFusible;
+          if (seccionadoresCuchillas) docData.seccionadoresCuchillas = seccionadoresCuchillas;
+          if (capacitor) docData.capacitor = capacitor;
+          if (transformadorCodigo || transformadorFase) docData.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
+        }
       } else if (tipoEntidad === 'linea') {
         docData.geometry = { type: 'LineString', coordinates: place || [] };
         docData.subtipo = tipoLinea;
@@ -164,6 +230,15 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
       if (tipoEntidad === 'poste') {
         finalPost.lat = place.lat;
         finalPost.lng = place.lng;
+        finalPost.itrs = optimisticPost.itrs;
+        if (estructuraChecked) finalPost.estructura = { codigo: codigoEstructura || 'N/A' };
+        if (luminariaChecked) {
+          finalPost.luminaria = { codigo: codigoLuminaria || (codigoEstructura || 'N/A') };
+          if (seccionadoresFusible) finalPost.seccionadoresFusible = seccionadoresFusible;
+          if (seccionadoresCuchillas) finalPost.seccionadoresCuchillas = seccionadoresCuchillas;
+          if (capacitor) finalPost.capacitor = capacitor;
+          if (transformadorCodigo || transformadorFase) finalPost.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
+        }
       } else {
         finalPost.geometry = { type: tipoEntidad === 'linea' ? 'LineString' : 'Polygon', coordinates: place || [] };
         finalPost.subtipo = tipoEntidad === 'linea' ? tipoLinea : tipoPoligono;
@@ -220,7 +295,7 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl w-full max-w-md">
+      <div className={"bg-white p-6 rounded-xl w-full max-w-md " + (luminariaChecked ? 'max-h-[80vh] overflow-y-auto' : '')}>
         <h2 className="text-xl font-bold">Registrar nuevo poste</h2>
         <label className="block mt-4">Tipo de entidad:</label>
         <select className="w-full border p-2" value={tipoEntidad} onChange={(e) => setTipoEntidad(e.target.value as any)}>
@@ -276,6 +351,61 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
             setPreviews(urls);
           } catch (e) { setPreviews([]); }
         }} />
+
+        {/* Additional poste fields */}
+        {tipoEntidad === 'poste' && (
+          <div className="mt-4 border-t pt-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <input id="estructura" type="checkbox" checked={estructuraChecked} onChange={(e) => setEstructuraChecked(e.target.checked)} />
+              <label htmlFor="estructura" className="font-medium">Estructura</label>
+            </div>
+            {estructuraChecked && (
+              <div>
+                <label className="block text-sm">Código de estructura</label>
+                <input className="w-full border p-2" value={codigoEstructura} onChange={(e) => setCodigoEstructura(e.target.value)} />
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <input id="luminaria" type="checkbox" checked={luminariaChecked} onChange={(e) => setLuminariaChecked(e.target.checked)} />
+              <label htmlFor="luminaria" className="font-medium">Luminaria</label>
+            </div>
+            {luminariaChecked && (
+              <>
+                <div>
+                  <label className="block text-sm">Código luminaria</label>
+                  <input className="w-full border p-2" value={codigoLuminaria || codigoEstructura || 'N/A'} onChange={(e) => setCodigoLuminaria(e.target.value)} />
+                </div>
+
+                <div>
+                  <label className="block text-sm">Seccionadores fusible</label>
+                  <input className="w-full border p-2" value={seccionadoresFusible} onChange={(e) => setSeccionadoresFusible(e.target.value)} />
+                </div>
+
+                <div>
+                  <label className="block text-sm">Seccionadores cuchillas</label>
+                  <input className="w-full border p-2" value={seccionadoresCuchillas} onChange={(e) => setSeccionadoresCuchillas(e.target.value)} />
+                </div>
+
+                <div>
+                  <label className="block text-sm">Capacitor</label>
+                  <input className="w-full border p-2" value={capacitor} onChange={(e) => setCapacitor(e.target.value)} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-sm">Transformador - Código</label>
+                    <input className="w-full border p-2" value={transformadorCodigo} onChange={(e) => setTransformadorCodigo(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm">Transformador - Fase</label>
+                    <input className="w-full border p-2" value={transformadorFase} onChange={(e) => setTransformadorFase(e.target.value)} />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {previews.length > 0 && (
           <div className="mt-3 grid grid-cols-3 gap-2">
