@@ -22,21 +22,13 @@ export default function Topbar({ onMenu }: { onMenu?: () => void }) {
         <h2 className="text-lg font-bold">CNEL — Activos eléctricos</h2>
       </div>
 
-      <div className="flex items-center gap-3">
-        <nav className="hidden sm:flex gap-4 text-sm">
-          <Link href="/dashboard">Inicio</Link>
-          <Link href="/dashboard/postes">Activos</Link>
-          <Link href="/dashboard/reporte">Reporte</Link>
-        </nav>
-
-        <button
-          onClick={handleLogout}
-          className="ml-2 text-sm px-3 py-1 rounded-md bg-red-600 hover:bg-red-700"
-          aria-label="Cerrar sesión"
-        >
-          Cerrar sesión
-        </button>
-      </div>
+        <div className="flex items-center gap-3">
+          <nav className="hidden sm:flex gap-4 text-sm">
+            <Link href="/dashboard">Inicio</Link>
+            <Link href="/dashboard/postes">Activos</Link>
+            <Link href="/dashboard/reporte">Reporte</Link>
+          </nav>
+        </div>
     </header>
   );
 }
