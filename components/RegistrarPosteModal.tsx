@@ -32,6 +32,11 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
   const [loading, setLoading] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
 
+  const removePhoto = (index: number) => {
+    setFotos((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSave = async () => {
     if (!place || (isArrayPlace && (place as any[]).length === 0)) {
       alert("No se detectó ubicación");
@@ -345,11 +350,12 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         <label className="block mt-4">Fotos:</label>
         <input type="file" multiple accept="image/*" onChange={(e) => {
           const files = Array.from(e.target.files || []);
-          setFotos(files);
+          if (files.length === 0) return;
+          setFotos((prev) => [...prev, ...files]);
           try {
             const urls = files.map((f) => URL.createObjectURL(f));
-            setPreviews(urls);
-          } catch (e) { setPreviews([]); }
+            setPreviews((prev) => [...prev, ...urls]);
+          } catch (e) { setPreviews((prev) => prev); }
         }} />
 
         {/* Additional poste fields */}
@@ -410,7 +416,15 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         {previews.length > 0 && (
           <div className="mt-3 grid grid-cols-3 gap-2">
             {previews.map((p, i) => (
-              <div key={i} className="w-full h-20 overflow-hidden rounded bg-gray-100">
+              <div key={i} className="w-full h-20 overflow-hidden rounded bg-gray-100 relative">
+                <button
+                  type="button"
+                  onClick={() => removePhoto(i)}
+                  className="absolute right-1 top-1 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center z-10"
+                  title="Eliminar foto"
+                >
+                  ×
+                </button>
                 <img src={p} className="w-full h-full object-cover" />
               </div>
             ))}
