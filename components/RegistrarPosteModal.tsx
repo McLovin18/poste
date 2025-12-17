@@ -112,8 +112,8 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         const storageRef = ref(storage, `postes/${basePath}/${Date.now()}-${safeName}`);
         const metadata = {
           customMetadata: {
-            owner: currentUser?.uid || null,
-            posteId: (usedId as string) || null,
+            owner: String(currentUser?.uid || ""),
+            posteId: String((usedId as string) || ""),
           },
           contentType: foto.type,
         };
