@@ -7,19 +7,33 @@ export default function VerPosteModal({ poste, onClose, onEdit }: { poste: any; 
   const { user } = useAuth();
   if (!poste) return null;
 
+  const humanType = poste.tipo === 'poste' ? 'Poste' : poste.tipo === 'linea' ? 'Línea' : poste.tipo === 'poligono' ? 'Polígono' : 'Elemento eléctrico';
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl overflow-auto max-h-[90vh]">
         <div className="flex justify-between items-center">
-          <h3 className="text-xl font-semibold">Detalle del Poste</h3>
+          <h3 className="text-xl font-semibold">Detalle - {humanType}</h3>
           <button onClick={onClose} className="text-sm text-gray-500">Cerrar</button>
         </div>
 
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p className="font-semibold">Nombre del poste: {poste.nombre}</p>
-            <p className="text-sm text-gray-600">id_poste: {poste.id_registro}</p>
-            <p className="text-xs text-gray-500">Lat: {poste.lat} — Lng: {poste.lng}</p>
+            <p className="font-semibold">Nombre: {poste.nombre}</p>
+            <p className="text-sm text-gray-600">ID: {poste.id_registro || poste.id}</p>
+            {poste.geometry && (
+              <div className="text-sm text-gray-600 mt-2">
+                <p className="font-semibold">Geometría: {poste.geometry.type}</p>
+                <p>Puntos: {(poste.geometry.coordinates && poste.geometry.coordinates.length) || 0}</p>
+                {poste.tipo === 'linea' && poste.subtipo && (
+                  <p className="text-sm text-gray-700 mt-1">Tipo de línea: {poste.subtipo}</p>
+                )}
+                {poste.tipo === 'poligono' && poste.subtipo && (
+                  <p className="text-sm text-gray-700 mt-1">Tipo de polígono: {poste.subtipo}</p>
+                )}
+              </div>
+            )}
+
             <p className="text-sm mt-2">Creado por: {user?.email || user?.name || 'Desconocido'}</p>
           </div>
 

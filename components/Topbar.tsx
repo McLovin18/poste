@@ -19,13 +19,13 @@ export default function Topbar({ onMenu }: { onMenu?: () => void }) {
         <button onClick={onMenu} className="p-2 rounded-md bg-white/10">
           <Menu />
         </button>
-        <h2 className="text-lg font-bold">CNEL Postes</h2>
+        <h2 className="text-lg font-bold">CNEL — Activos eléctricos</h2>
       </div>
 
       <div className="flex items-center gap-3">
         <nav className="hidden sm:flex gap-4 text-sm">
           <Link href="/dashboard">Inicio</Link>
-          <Link href="/dashboard/postes">Postes</Link>
+          <Link href="/dashboard/postes">Activos</Link>
           <Link href="/dashboard/reporte">Reporte</Link>
         </nav>
 

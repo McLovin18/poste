@@ -63,7 +63,7 @@ export default function PostesPage() {
     <DashboardShell>
       <div className="space-y-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Postes</h1>
+          <h1 className="text-2xl font-bold">Activos eléctricos</h1>
           <div className="text-sm text-gray-600">
             {user?.email}{" "}
             {user?.role && (
@@ -87,7 +87,7 @@ export default function PostesPage() {
         {loading ? (
           <p>Cargando...</p>
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-gray-600">No hay postes que mostrar.</p>
+          <p className="text-sm text-gray-600">No hay activos eléctricos que mostrar.</p>
         ) : (
           <div className="space-y-3">
             {filtered.map((p) => (
@@ -98,9 +98,7 @@ export default function PostesPage() {
                 <div>
                   <p className="font-semibold">{p.nombre ?? "-"}</p>
                   <p className="text-sm text-gray-600">{p.id_registro ?? "-"}</p>
-                  <p className="text-xs text-gray-500">
-                    Lat: {p.lat ?? "N/A"}, Lng: {p.lng ?? "N/A"}
-                  </p>
+                  {/* Lat/Lng hidden from UI by request */}
                 </div>
 
                 <div className="flex gap-2">

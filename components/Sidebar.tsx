@@ -29,13 +29,13 @@ export default function Sidebar({
 
         <div className="relative w-64 h-full bg-gray-900 text-white p-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold">CNEL - Postes</h2>
+            <h2 className="text-lg font-bold">CNEL - Activos eléctricos</h2>
             <button onClick={onClose}><X /></button>
           </div>
 
           <nav className="flex flex-col gap-4">
             <Link href="/dashboard" onClick={onClose}>Inicio</Link>
-            <Link href="/dashboard/postes" onClick={onClose}>Postes</Link>
+            <Link href="/dashboard/postes" onClick={onClose}>Activos</Link>
             <Link href="/dashboard/reporte" onClick={onClose}>Reporte diario</Link>
           </nav>
           <div className="mt-6">

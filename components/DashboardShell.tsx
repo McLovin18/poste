@@ -22,7 +22,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         <h2 className="text-xl font-bold mb-6">CNEL - Postes</h2>
         <nav className="flex flex-col gap-4">
           <Link href="/dashboard" className="hover:text-yellow-300">Inicio</Link>
-          <Link href="/dashboard/postes" className="hover:text-yellow-300">Postes</Link>
+          <Link href="/dashboard/postes" className="hover:text-yellow-300">Activos electrónicos</Link>
           <Link href="/dashboard/reporte" className="hover:text-yellow-300">Reporte diario</Link>
         </nav>
 
