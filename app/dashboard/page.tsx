@@ -300,74 +300,79 @@ export default function DashboardPage() {
     <DashboardShell>
       <div className="flex flex-col gap-6">
 
-      {/* Título */}
-      <h1 className="text-2xl font-bold">Inicio</h1>
-
-      {/* MAPA */}
-      <section>
-        <div className="bg-white rounded shadow p-4">
-          <GoogleMapComponent postes={postes} onSaved={handleSavedPost} />
+        {/* Título */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Inicio</h1>
+            <p className="text-sm text-gray-500 mt-1">Mapa de activos y registros creados hoy.</p>
+          </div>
         </div>
-      </section>
 
-      {/* REGISTROS DE HOY */}
-      <section>
-        <div className="bg-white rounded shadow p-4">
-          <h2 className="text-lg font-semibold mb-3">Registros hoy</h2>
+        {/* MAPA */}
+        <section>
+          <div className="bg-white/90 backdrop-blur rounded-2xl shadow-md p-3 md:p-4 border border-slate-100">
+            <GoogleMapComponent postes={postes} onSaved={handleSavedPost} />
+          </div>
+        </section>
 
-          {loading ? (
-            <p>Cargando...</p>
-          ) : postes.length === 0 ? (
-            <p className="text-sm text-gray-600">No hay registros hoy.</p>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {postes.map((p) => (
-                <div
-                  key={(p.id || p.id_registro || JSON.stringify(p.geometry) || JSON.stringify(p)).toString()}
-                  className="p-3 border rounded flex items-start gap-3 bg-white"
-                >
-                  <div className="w-24 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                    {p.fotosURLs?.[0] ? (
-                      <img
-                        src={p.fotosURLs[0]}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
-                        Sin foto
-                      </div>
-                    )}
-                  </div>
+        {/* REGISTROS DE HOY */}
+        <section>
+          <div className="bg-white/90 backdrop-blur rounded-2xl shadow-md p-4 border border-slate-100">
+            <h2 className="text-lg font-semibold mb-3">Registros hoy</h2>
 
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="font-semibold">{p.nombre || "-"}</div>
-                      <div className="text-xs text-gray-500 px-2 py-1 border rounded-full">{
-                        (p.tipo === 'poste' ? 'Poste' : p.tipo === 'linea' ? 'Línea' : p.tipo === 'poligono' ? 'Polígono' : 'Elemento')
-                      }</div>
+            {loading ? (
+              <p className="text-sm text-gray-600">Cargando...</p>
+            ) : postes.length === 0 ? (
+              <p className="text-sm text-gray-600">No hay registros hoy.</p>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {postes.map((p) => (
+                  <div
+                    key={(p.id || p.id_registro || JSON.stringify(p.geometry) || JSON.stringify(p)).toString()}
+                    className="p-3 border border-slate-100 rounded-xl flex items-start gap-3 bg-white hover:shadow-md transition"
+                  >
+                    <div className="w-24 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                      {p.fotosURLs?.[0] ? (
+                        <img
+                          src={p.fotosURLs[0]}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                          Sin foto
+                        </div>
+                      )}
                     </div>
-                    <div className="text-sm text-gray-500">{p.id_registro || p.id}</div>
-                    <div className="text-xs text-gray-400 mt-1">{new Date(
-                        p.fecha?.toDate ? p.fecha.toDate() : p.fecha
-                      ).toLocaleString()}</div>
-                  </div>
 
-                  <div className="flex flex-col gap-2">
-                    <button
-                      className="px-3 py-1 border rounded"
-                      onClick={() =>
-                        window.scrollTo({ top: 0, behavior: "smooth" })
-                      }
-                    >
-                      Ver
-                    </button>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="font-semibold text-slate-900">{p.nombre || "-"}</div>
+                        <div className="text-xs text-gray-600 px-2 py-0.5 rounded-full bg-slate-100">{
+                          (p.tipo === 'poste' ? 'Poste' : p.tipo === 'linea' ? 'Línea' : p.tipo === 'poligono' ? 'Polígono' : 'Elemento')
+                        }</div>
+                      </div>
+                      <div className="text-sm text-gray-500">{p.id_registro || p.id}</div>
+                      <div className="text-xs text-gray-400 mt-1">{new Date(
+                          p.fecha?.toDate ? p.fecha.toDate() : p.fecha
+                        ).toLocaleString()}</div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <button
+                        className="px-3 py-1.5 text-xs rounded-full border border-sky-500 text-sky-600 hover:bg-sky-50 transition"
+                        onClick={() =>
+                          window.scrollTo({ top: 0, behavior: "smooth" })
+                        }
+                      >
+                        Ver
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
 
       </div>
     </DashboardShell>

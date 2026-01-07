@@ -28,6 +28,10 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
   const [capacitor, setCapacitor] = useState<string>('');
   const [transformadorCodigo, setTransformadorCodigo] = useState<string>('');
   const [transformadorFase, setTransformadorFase] = useState<string>('');
+  const [nivelTension, setNivelTension] = useState<string>('');
+  const [conexion1, setConexion1] = useState<string>('');
+  const [conexion2, setConexion2] = useState<string>('');
+  const [transformadoresTexto, setTransformadoresTexto] = useState<string>('');
   const [fotos, setFotos] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -129,12 +133,16 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         optimisticPost.itrs = { x, y, z };
         // include form fields
         if (estructuraChecked) optimisticPost.estructura = { codigo: codigoEstructura || 'N/A' };
+        if (nivelTension) optimisticPost.nivelTension = nivelTension;
+        if (conexion1) optimisticPost.conexion1 = conexion1;
+        if (conexion2) optimisticPost.conexion2 = conexion2;
+        if (seccionadoresCuchillas) optimisticPost.seccionadoresCuchillas = seccionadoresCuchillas;
+        if (transformadoresTexto) optimisticPost.transformadores = transformadoresTexto;
+        if (transformadorCodigo || transformadorFase) optimisticPost.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
         if (luminariaChecked) {
           optimisticPost.luminaria = { codigo: codigoLuminaria || (codigoEstructura || 'N/A') };
           if (seccionadoresFusible) optimisticPost.seccionadoresFusible = seccionadoresFusible;
-          if (seccionadoresCuchillas) optimisticPost.seccionadoresCuchillas = seccionadoresCuchillas;
           if (capacitor) optimisticPost.capacitor = capacitor;
-          if (transformadorCodigo || transformadorFase) optimisticPost.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
         }
       } else if (tipoEntidad === 'linea') {
         optimisticPost.geometry = { type: 'LineString', coordinates: place || [] };
@@ -201,12 +209,16 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         }
         // add additional poste fields
         if (estructuraChecked) docData.estructura = { codigo: codigoEstructura || 'N/A' };
+        if (nivelTension) docData.nivelTension = nivelTension;
+        if (conexion1) docData.conexion1 = conexion1;
+        if (conexion2) docData.conexion2 = conexion2;
+        if (seccionadoresCuchillas) docData.seccionadoresCuchillas = seccionadoresCuchillas;
+        if (transformadoresTexto) docData.transformadores = transformadoresTexto;
+        if (transformadorCodigo || transformadorFase) docData.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
         if (luminariaChecked) {
           docData.luminaria = { codigo: codigoLuminaria || (codigoEstructura || 'N/A') };
           if (seccionadoresFusible) docData.seccionadoresFusible = seccionadoresFusible;
-          if (seccionadoresCuchillas) docData.seccionadoresCuchillas = seccionadoresCuchillas;
           if (capacitor) docData.capacitor = capacitor;
-          if (transformadorCodigo || transformadorFase) docData.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
         }
       } else if (tipoEntidad === 'linea') {
         docData.geometry = { type: 'LineString', coordinates: place || [] };
@@ -237,12 +249,16 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         finalPost.lng = place.lng;
         finalPost.itrs = optimisticPost.itrs;
         if (estructuraChecked) finalPost.estructura = { codigo: codigoEstructura || 'N/A' };
+        if (nivelTension) finalPost.nivelTension = nivelTension;
+        if (conexion1) finalPost.conexion1 = conexion1;
+        if (conexion2) finalPost.conexion2 = conexion2;
+        if (seccionadoresCuchillas) finalPost.seccionadoresCuchillas = seccionadoresCuchillas;
+        if (transformadoresTexto) finalPost.transformadores = transformadoresTexto;
+        if (transformadorCodigo || transformadorFase) finalPost.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
         if (luminariaChecked) {
           finalPost.luminaria = { codigo: codigoLuminaria || (codigoEstructura || 'N/A') };
           if (seccionadoresFusible) finalPost.seccionadoresFusible = seccionadoresFusible;
-          if (seccionadoresCuchillas) finalPost.seccionadoresCuchillas = seccionadoresCuchillas;
           if (capacitor) finalPost.capacitor = capacitor;
-          if (transformadorCodigo || transformadorFase) finalPost.transformador = { codigo: transformadorCodigo || '', fase: transformadorFase || '' };
         }
       } else {
         finalPost.geometry = { type: tipoEntidad === 'linea' ? 'LineString' : 'Polygon', coordinates: place || [] };
@@ -361,16 +377,48 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
         {/* Additional poste fields */}
         {tipoEntidad === 'poste' && (
           <div className="mt-4 border-t pt-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <input id="estructura" type="checkbox" checked={estructuraChecked} onChange={(e) => setEstructuraChecked(e.target.checked)} />
-              <label htmlFor="estructura" className="font-medium">Estructura</label>
-            </div>
-            {estructuraChecked && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm">Código de estructura</label>
+                <label className="block text-sm font-medium">Nivel de tensión de voltaje</label>
+                <input className="w-full border p-2" value={nivelTension} onChange={(e) => setNivelTension(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Código de estructura</label>
                 <input className="w-full border p-2" value={codigoEstructura} onChange={(e) => setCodigoEstructura(e.target.value)} />
               </div>
-            )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              <div>
+                <label className="block text-sm font-medium">Conexión 1</label>
+                <input className="w-full border p-2" value={conexion1} onChange={(e) => setConexion1(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Conexión 2</label>
+                <input className="w-full border p-2" value={conexion2} onChange={(e) => setConexion2(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="mt-2">
+              <label className="block text-sm font-medium">Transformadores</label>
+              <textarea className="w-full border p-2" rows={2} value={transformadoresTexto} onChange={(e) => setTransformadoresTexto(e.target.value)} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              <div>
+                <label className="block text-sm font-medium">Seccionadores de cuchillas</label>
+                <input className="w-full border p-2" value={seccionadoresCuchillas} onChange={(e) => setSeccionadoresCuchillas(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Fase</label>
+                <input className="w-full border p-2" value={transformadorFase} onChange={(e) => setTransformadorFase(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-3">
+              <input id="estructura" type="checkbox" checked={estructuraChecked} onChange={(e) => setEstructuraChecked(e.target.checked)} />
+              <label htmlFor="estructura" className="font-medium">Marcado como estructura</label>
+            </div>
 
             <div className="flex items-center gap-2">
               <input id="luminaria" type="checkbox" checked={luminariaChecked} onChange={(e) => setLuminariaChecked(e.target.checked)} />
@@ -389,23 +437,14 @@ export default function RegistroModal({ location, currentUser, onClose, onSaved 
                 </div>
 
                 <div>
-                  <label className="block text-sm">Seccionadores cuchillas</label>
-                  <input className="w-full border p-2" value={seccionadoresCuchillas} onChange={(e) => setSeccionadoresCuchillas(e.target.value)} />
-                </div>
-
-                <div>
                   <label className="block text-sm">Capacitor</label>
                   <input className="w-full border p-2" value={capacitor} onChange={(e) => setCapacitor(e.target.value)} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <label className="block text-sm">Transformador - Código</label>
                     <input className="w-full border p-2" value={transformadorCodigo} onChange={(e) => setTransformadorCodigo(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="block text-sm">Transformador - Fase</label>
-                    <input className="w-full border p-2" value={transformadorFase} onChange={(e) => setTransformadorFase(e.target.value)} />
                   </div>
                 </div>
               </>

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAdminFirestore, getAdmin } from '@/lib/firebaseAdmin';
 import { PDFDocument as PDFLib, StandardFonts, rgb } from 'pdf-lib';
 
@@ -45,6 +45,15 @@ async function createReportPdfBytes(posts: any[], dateLabel: string) {
   let y = page.getHeight() - margin;
   const lineHeight = 14;
 
+  const drawLine = (text: string, size = 10) => {
+    if (y < margin + 40) {
+      page = pdfDoc.addPage(PAGE_SIZE);
+      y = page.getHeight() - margin;
+    }
+    page.drawText(text, { x, y, size, font });
+    y -= lineHeight;
+  };
+
   page.drawText('Reporte diario de levantamiento de postes', { x: margin, y: y - 6, size: 16, font, color: rgb(0, 0, 0) });
   y -= 30;
   page.drawText(`Fecha: ${dateLabel}`, { x: margin, y: y, size: 12, font });
@@ -60,15 +69,124 @@ async function createReportPdfBytes(posts: any[], dateLabel: string) {
         page = pdfDoc.addPage(PAGE_SIZE);
         y = page.getHeight() - margin;
       }
+      // Encabezado del registro
       page.drawText(title, { x, y, size: 12, font });
       y -= lineHeight;
-      const fechaStr = p.fecha?.toDate ? p.fecha.toDate().toLocaleString() : (p.fecha ? String(p.fecha) : '-');
-      page.drawText(`   Fecha: ${fechaStr}`, { x, y, size: 10, font });
-      y -= lineHeight;
-      page.drawText(`   Ubicación: lat ${p.lat || '-'} lng ${p.lng || '-'}`, { x, y, size: 10, font });
-      y -= lineHeight;
-      page.drawText(`   Creado por: ${p.creadoPorEmail || p.creadoPor || '-'}`, { x, y, size: 10, font });
-      y -= lineHeight;
+
+      const fechaStr = p.fecha?.toDate
+        ? p.fecha.toDate().toLocaleString()
+        : (p.fecha ? String(p.fecha) : '-');
+      drawLine(`   Fecha: ${fechaStr}`);
+
+      // Información general
+      const tipoLabel = p.tipo === 'poste'
+        ? 'Poste'
+        : p.tipo === 'linea'
+        ? 'Línea'
+        : p.tipo === 'poligono'
+        ? 'Polígono'
+        : (p.tipo || 'Elemento');
+      drawLine(`   Tipo: ${tipoLabel}`);
+
+      if (p.subtipo) {
+        drawLine(`   Subtipo: ${p.subtipo}`);
+      }
+
+      // Ubicación: forzar cálculo o uso de coordenadas ITRS (ECEF) a partir de lat/lng si es necesario
+      let itrs = p.itrs as { x?: number; y?: number; z?: number } | undefined;
+      if (!itrs && typeof p.lat === 'number' && typeof p.lng === 'number') {
+        try {
+          const lat = Number(p.lat);
+          const lon = Number(p.lng);
+          const toRad = (d: number) => (d * Math.PI) / 180;
+          const a = 6378137.0;
+          const f = 1 / 298.257223563;
+          const e2 = f * (2 - f);
+          const sinLat = Math.sin(toRad(lat));
+          const cosLat = Math.cos(toRad(lat));
+          const sinLon = Math.sin(toRad(lon));
+          const cosLon = Math.cos(toRad(lon));
+          const N = a / Math.sqrt(1 - e2 * sinLat * sinLat);
+          const h = 0;
+          const xECEF = (N + h) * cosLat * cosLon;
+          const yECEF = (N + h) * cosLat * sinLon;
+          const zECEF = ((1 - e2) * N + h) * sinLat;
+          itrs = { x: xECEF, y: yECEF, z: zECEF };
+        } catch {}
+      }
+
+      if (itrs) {
+        const xIt = typeof itrs.x === 'number' ? itrs.x.toFixed(3) : String(itrs.x ?? '-');
+        const yIt = typeof itrs.y === 'number' ? itrs.y.toFixed(3) : String(itrs.y ?? '-');
+        const zIt = typeof itrs.z === 'number' ? itrs.z.toFixed(3) : String(itrs.z ?? '-');
+        drawLine(`   Coordenadas ITRS (ECEF):`);
+        drawLine(`      X: ${xIt}`);
+        drawLine(`      Y: ${yIt}`);
+        drawLine(`      Z: ${zIt}`);
+      } else if (p.lat !== undefined || p.lng !== undefined) {
+        // Último respaldo solo si algo raro pasa con el cálculo
+        drawLine(`   Ubicación aprox (lat/lng): lat ${p.lat ?? '-'}  lng ${p.lng ?? '-'}`);
+      }
+
+      drawLine(`   Creado por: ${p.creadoPorEmail || p.creadoPor || '-'}`);
+
+      // Campos eléctricos adicionales
+      if (p.nivelTension) {
+        drawLine(`   Nivel de tensión: ${p.nivelTension}`);
+      }
+
+      if (p.conexion1 || p.conexion2) {
+        if (p.conexion1) drawLine(`   Conexión 1: ${p.conexion1}`);
+        if (p.conexion2) drawLine(`   Conexión 2: ${p.conexion2}`);
+      }
+
+      if (p.estructura?.codigo) {
+        drawLine(`   Código de estructura: ${p.estructura.codigo}`);
+      }
+
+      if (p.luminaria?.codigo) {
+        drawLine(`   Luminaria: ${p.luminaria.codigo}`);
+      }
+
+      if (p.seccionadoresFusible) {
+        drawLine(`   Seccionadores fusible: ${p.seccionadoresFusible}`);
+      }
+
+      if (p.seccionadoresCuchillas) {
+        drawLine(`   Seccionadores de cuchillas: ${p.seccionadoresCuchillas}`);
+      }
+
+      if (p.capacitor) {
+        drawLine(`   Capacitor: ${p.capacitor}`);
+      }
+
+      if (p.transformador) {
+        if (p.transformador.codigo) {
+          drawLine(`   Transformador - Código: ${p.transformador.codigo}`);
+        }
+        if (p.transformador.fase) {
+          drawLine(`   Transformador - Fase: ${p.transformador.fase}`);
+        }
+      }
+
+      if (p.transformadores) {
+        drawLine(`   Transformadores (detalle): ${p.transformadores}`);
+      }
+
+      if (p.geometry) {
+        const type = p.geometry.type || 'geometry';
+        const coords = Array.isArray(p.geometry.coordinates)
+          ? p.geometry.coordinates
+          : [];
+        let count = 0;
+        if (type === 'Polygon' && Array.isArray(coords[0])) {
+          const ring = Array.isArray(coords[0][0]) ? coords[0] : coords[0];
+          count = Array.isArray(ring) ? ring.length : 0;
+        } else {
+          count = coords.length;
+        }
+        drawLine(`   Geometría: ${type} (puntos: ${count})`);
+      }
 
       const fotos = p.fotosURLs || p.imagenes || p.fotos || [];
       if (Array.isArray(fotos) && fotos.length > 0) {
@@ -107,12 +225,26 @@ async function createReportPdfBytes(posts: any[], dateLabel: string) {
   return await pdfDoc.save();
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    // compute date range first
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    // Determine target date (from query param ?date=YYYY-MM-DD, default today)
+    const { searchParams } = new URL(req.url);
+    const dateParam = searchParams.get('date');
+
+    let baseDate: Date;
+    if (dateParam) {
+      const [year, month, day] = dateParam.split('-').map((v) => parseInt(v, 10));
+      if (!year || !month || !day) {
+        return NextResponse.json({ error: 'Fecha inválida' }, { status: 400 });
+      }
+      baseDate = new Date(year, month - 1, day);
+    } else {
+      baseDate = new Date();
+    }
+
+    // compute date range (local day for selected date)
+    const start = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 0, 0, 0);
+    const end = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 23, 59, 59);
 
     let arr: any[] = [];
     let usedAdmin = false;
@@ -222,7 +354,8 @@ export async function GET() {
     // (arr already populated by Admin SDK or REST fallback above)
 
     // Generar PDF using pdf-lib helper
-    const bytes = await createReportPdfBytes(arr, start.toLocaleDateString());
+    const dateLabel = start.toLocaleDateString();
+    const bytes = await createReportPdfBytes(arr, dateLabel);
     return new Response(new Uint8Array(bytes), {
       status: 200,
       headers: {

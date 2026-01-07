@@ -8,6 +8,14 @@ export default function VerPosteModal({ poste, onClose, onEdit }: { poste: any; 
   if (!poste) return null;
 
   const humanType = poste.tipo === 'poste' ? 'Poste' : poste.tipo === 'linea' ? 'Línea' : poste.tipo === 'poligono' ? 'Polígono' : 'Elemento eléctrico';
+  const createdAt: Date | null = poste.fecha?.toDate
+    ? poste.fecha.toDate()
+    : poste.fecha
+    ? new Date(poste.fecha)
+    : null;
+  const createdAtLabel = createdAt && !isNaN(createdAt.getTime())
+    ? createdAt.toLocaleString()
+    : null;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -21,6 +29,18 @@ export default function VerPosteModal({ poste, onClose, onEdit }: { poste: any; 
           <div>
             <p className="font-semibold">Nombre: {poste.nombre}</p>
             <p className="text-sm text-gray-600">ID: {poste.id_registro || poste.id}</p>
+            {createdAtLabel && (
+              <p className="text-sm text-gray-600">Fecha de creación: {createdAtLabel}</p>
+            )}
+            {poste.nivelTension && (
+              <p className="text-sm text-gray-600 mt-1">Nivel de tensión: {poste.nivelTension}</p>
+            )}
+            {(poste.conexion1 || poste.conexion2) && (
+              <div className="text-sm text-gray-600 mt-1">
+                {poste.conexion1 && <p>Conexión 1: {poste.conexion1}</p>}
+                {poste.conexion2 && <p>Conexión 2: {poste.conexion2}</p>}
+              </div>
+            )}
             {poste.geometry && (
               <div className="text-sm text-gray-600 mt-2">
                 <p className="font-semibold">Geometría: {poste.geometry.type}</p>
@@ -46,7 +66,14 @@ export default function VerPosteModal({ poste, onClose, onEdit }: { poste: any; 
               {poste.estructura && (
                 <div className="text-sm text-gray-600 mt-2">
                   <p className="font-semibold">Estructura</p>
-                  <p>{poste.estructura.codigo}</p>
+                  <p>Código: {poste.estructura.codigo}</p>
+                </div>
+              )}
+
+              {poste.transformadores && (
+                <div className="text-sm text-gray-600 mt-2">
+                  <p className="font-semibold">Transformadores</p>
+                  <p>{poste.transformadores}</p>
                 </div>
               )}
 
@@ -62,7 +89,7 @@ export default function VerPosteModal({ poste, onClose, onEdit }: { poste: any; 
               )}
 
               {poste.seccionadoresCuchillas && (
-                <p className="text-sm text-gray-600 mt-2">Seccionadores cuchillas: {poste.seccionadoresCuchillas}</p>
+                <p className="text-sm text-gray-600 mt-2">Seccionadores de cuchillas: {poste.seccionadoresCuchillas}</p>
               )}
 
               {poste.capacitor && (

@@ -62,9 +62,12 @@ export default function PostesPage() {
   return (
     <DashboardShell>
       <div className="space-y-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">Activos eléctricos</h1>
-          <div className="text-sm text-gray-600">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Activos eléctricos</h1>
+            <p className="text-sm text-gray-500 mt-1">Listado completo de activos registrados en el sistema.</p>
+          </div>
+          <div className="text-sm text-gray-600 flex items-center gap-2 bg-white/70 px-3 py-1.5 rounded-full shadow-sm">
             {user?.email}{" "}
             {user?.role && (
               <span className="ml-2 text-xs px-2 py-1 bg-gray-100 rounded">{user.role}</span>
@@ -72,14 +75,17 @@ export default function PostesPage() {
           </div>
         </div>
 
-        <div className="mb-4 flex gap-2">
+        <div className="mb-4 flex flex-col sm:flex-row gap-3">
           <input
             value={qStr}
             onChange={(e) => setQStr(e.target.value)}
             placeholder="Buscar por id o nombre"
-            className="border p-2 rounded flex-1"
+            className="border border-slate-200 bg-white rounded-lg flex-1 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 text-sm"
           />
-          <button onClick={loadPostes} className="px-3 py-2 bg-gray-200 rounded">
+          <button
+            onClick={loadPostes}
+            className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-medium shadow-sm transition"
+          >
             Refrescar
           </button>
         </div>
@@ -93,16 +99,19 @@ export default function PostesPage() {
             {filtered.map((p) => (
               <div
                 key={p.id ?? p.id_registro ?? Math.random()} // evitar key duplicado o undefined
-                className="bg-white p-3 rounded shadow flex items-center justify-between"
+                className="bg-white/80 backdrop-blur border border-slate-100 p-4 rounded-xl shadow-sm hover:shadow-md transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
               >
-                <div>
-                  <p className="font-semibold">{p.nombre ?? "-"}</p>
+                <div className="space-y-1">
+                  <p className="font-semibold text-slate-900">{p.nombre ?? "-"}</p>
                   <p className="text-sm text-gray-600">{p.id_registro ?? "-"}</p>
                   {/* Lat/Lng hidden from UI by request */}
                 </div>
 
-                <div className="flex gap-2">
-                  <button onClick={() => setSelected(p)} className="px-3 py-1 border rounded">
+                <div className="flex flex-wrap gap-2 justify-end">
+                  <button
+                    onClick={() => setSelected(p)}
+                    className="px-3 py-1.5 text-xs sm:text-sm rounded-full border border-sky-500 text-sky-600 hover:bg-sky-50 transition"
+                  >
                     Ver más
                   </button>
 
@@ -110,13 +119,13 @@ export default function PostesPage() {
                     <>
                       <button
                         onClick={() => setEditSelected(p)}
-                        className="px-3 py-1 bg-yellow-500 text-black rounded"
+                        className="px-3 py-1.5 text-xs sm:text-sm rounded-full bg-amber-400 hover:bg-amber-500 text-black transition"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => handleDelete(p)}
-                        className="px-3 py-1 bg-red-500 text-white rounded"
+                        className="px-3 py-1.5 text-xs sm:text-sm rounded-full bg-red-500 hover:bg-red-600 text-white transition"
                       >
                         Eliminar
                       </button>
