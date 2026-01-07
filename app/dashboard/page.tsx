@@ -56,14 +56,11 @@ export default function DashboardPage() {
     if (authLoading || !user) return;
 
     setLoading(true);
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
+    // Para el mapa queremos ver todos los postes, sin filtrar por fecha.
+    // El filtrado "de hoy" solo se aplicará en la sección de "Registros hoy".
     const q = query(
       collection(db, "postes"),
-      where("fecha", ">=", Timestamp.fromDate(start)),
-      where("fecha", "<=", Timestamp.fromDate(end)),
       orderBy("fecha", "desc")
     );
 
@@ -289,6 +286,29 @@ export default function DashboardPage() {
     return () => unsub();
   }, [authLoading, user]);
 
+  // Filtrar solo los registros creados hoy para la sección "Registros hoy"
+  const todayStart = (() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  })();
+
+  const todayEnd = (() => {
+    const d = new Date();
+    d.setHours(23, 59, 59, 999);
+    return d;
+  })();
+
+  const registrosHoy = postes.filter((p) => {
+    try {
+      const fechaRaw = p?.fecha?.toDate ? p.fecha.toDate() : (p?.fecha ? new Date(p.fecha) : null);
+      if (!fechaRaw || isNaN(fechaRaw.getTime())) return false;
+      return fechaRaw >= todayStart && fechaRaw <= todayEnd;
+    } catch {
+      return false;
+    }
+  });
+
   if (authLoading) return <p>Cargando sesión...</p>;
 
   if (!user) {
@@ -322,11 +342,11 @@ export default function DashboardPage() {
 
             {loading ? (
               <p className="text-sm text-gray-600">Cargando...</p>
-            ) : postes.length === 0 ? (
+            ) : registrosHoy.length === 0 ? (
               <p className="text-sm text-gray-600">No hay registros hoy.</p>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {postes.map((p) => (
+                {registrosHoy.map((p) => (
                   <div
                     key={(p.id || p.id_registro || JSON.stringify(p.geometry) || JSON.stringify(p)).toString()}
                     className="p-3 border border-slate-100 rounded-xl flex items-start gap-3 bg-white hover:shadow-md transition"
