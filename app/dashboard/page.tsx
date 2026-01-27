@@ -236,34 +236,8 @@ export default function DashboardPage() {
               } catch (e) { return null; }
             };
 
-            const threshold = 0.0002; // ~20m tolerance
-            const kept: any[] = [];
-
-            for (const item of merged) {
-              const c = firstLatLng(item);
-              if (!c) {
-                kept.push(item);
-                continue;
-              }
-              let matched = false;
-              for (let i = 0; i < kept.length; i++) {
-                const k = kept[i];
-                const kc = firstLatLng(k);
-                if (!kc) continue;
-                if ((item.tipo || 'poste') !== (k.tipo || 'poste')) continue;
-                const dlat = Math.abs(c.lat - kc.lat);
-                const dlng = Math.abs(c.lng - kc.lng);
-                if (dlat < threshold && dlng < threshold) {
-                  // same place: prefer non-temp over temp
-                  if (isTemp(k) && !isTemp(item)) {
-                    kept[i] = item;
-                  }
-                  matched = true;
-                  break;
-                }
-              }
-              if (!matched) kept.push(item);
-            }
+            const threshold = 0.0002; // ~20m tolerance (actual dedupe desactivado)
+            const kept: any[] = merged;
 
             // final canonical pass to remove exact duplicates
             const seen = new Set<string>();
@@ -271,8 +245,8 @@ export default function DashboardPage() {
             for (const item of kept) {
               const key = canonical(item);
               if (!key) continue;
-              if (seen.has(key)) continue;
-              seen.add(key);
+              if (seen.has(key as string)) continue;
+              seen.add(key as string);
               final.push(item);
             }
 
