@@ -64,10 +64,10 @@ export default function DashboardPage() {
       orderBy("fecha", "desc")
     );
 
-    // Cargar cached antes del snapshot (dedupe usando geometría/ids)
+    // Cargar cached antes del snapshot (desactivado por simplicidad: usamos solo Firestore)
     try {
       const cached = JSON.parse(localStorage.getItem("local_postes") || "[]");
-      if (Array.isArray(cached) && cached.length) {
+      if (false && Array.isArray(cached) && cached.length) {
         const canonicalFor = (o: any) => {
           if (!o) return null;
           if (o.id_registro) return `r:${o.id_registro}`;
@@ -107,7 +107,7 @@ export default function DashboardPage() {
 
         try {
           const cached = JSON.parse(localStorage.getItem("local_postes") || "[]");
-          if (Array.isArray(cached) && cached.length) {
+          if (false && Array.isArray(cached) && cached.length) {
             const map = new Map<string, any>();
 
             const normalizeGeometryString = (geom: any) => {
@@ -166,9 +166,15 @@ export default function DashboardPage() {
               return `tmp:${o.nombre || ''}:${o.fecha?.seconds || o.fecha || Math.random()}`;
             };
 
+            // Insertar manteniendo el más reciente para cada key.
+            // El snapshot ya viene ordenado por fecha desc, así que
+            // la primera vez que vemos una key debe ser el registro más nuevo.
             arr.forEach((s) => {
               const key = makeKey(s);
-              map.set(key, s);
+              if (!key) return;
+              if (!map.has(key)) {
+                map.set(key, s);
+              }
             });
             for (const c of cached) {
               const key = makeKey(c);

@@ -34,6 +34,13 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && isAdmin();
     }
 
+    // Sequential counters (e.g., counters/postes)
+    match /counters/{counterId} {
+      // Allow authenticated users to read and increment counters needed
+      // to generate sequential IDs (like P000001, etc.).
+      allow read, create, update: if isSignedIn();
+    }
+
     // Default: deny everything else
     match /{document=**} {
       allow read, write: if false;

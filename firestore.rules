@@ -32,5 +32,12 @@ service cloud.firestore {
       // delete: admin only
       allow delete: if isAdmin();
     }
+
+    // Contadores secuenciales (por ejemplo, counters/postes)
+    match /counters/{counterId} {
+      // Solo usuarios autenticados pueden leer/escribir contadores
+      // (si quieres, puedes restringirlo a admin en el futuro)
+      allow read, create, update: if isSignedIn();
+    }
   }
 }
