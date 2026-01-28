@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
+import ChatWidget from "@/components/ChatWidget";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -40,7 +41,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       <Sidebar isOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
       {/* Main area */}
-      <div className="flex-1 min-h-screen flex flex-col">
+      <div className="flex-1 min-h-screen flex flex-col relative">
         {/* Topbar only visible on mobile */}
         <div className="md:hidden">
           <Topbar onMenu={() => setMobileOpen(true)} />
@@ -51,6 +52,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             {children}
           </div>
         </main>
+
+        {/* Chat general flotante para todos los trabajadores autenticados */}
+        <ChatWidget />
       </div>
     </div>
   );
