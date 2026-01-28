@@ -6,10 +6,8 @@ import {
   collection,
   collectionGroup,
   onSnapshot,
-  orderBy,
   query,
   where,
-  limit,
   doc,
   setDoc,
   addDoc,
@@ -90,9 +88,7 @@ export default function ChatControls() {
     if (!user) return;
     const q = query(
       collectionGroup(db, "messages"),
-      where("toUid", "==", user.uid),
-      orderBy("createdAt", "desc"),
-      limit(50)
+      where("toUid", "==", user.uid)
     );
     const unsub = onSnapshot(q, (snap) => {
       const arr: PrivateMessage[] = [];
@@ -105,6 +101,29 @@ export default function ChatControls() {
           text: data.text ?? "",
           createdAt: data.createdAt ?? null,
         });
+      });
+      // ordenar por createdAt descendente en el cliente
+      arr.sort((a, b) => {
+        const ta: any = a.createdAt;
+        const tb: any = b.createdAt;
+
+        const da =
+          ta instanceof Date
+            ? ta
+            : ta && typeof ta === "object" && "seconds" in ta
+            ? new Date(ta.seconds * 1000)
+            : null;
+        const dbb =
+          tb instanceof Date
+            ? tb
+            : tb && typeof tb === "object" && "seconds" in tb
+            ? new Date(tb.seconds * 1000)
+            : null;
+
+        if (!da && !dbb) return 0;
+        if (!da) return 1;
+        if (!dbb) return -1;
+        return dbb.getTime() - da.getTime();
       });
       setIncoming(arr);
     });
@@ -247,7 +266,7 @@ export default function ChatControls() {
       </div>
 
       {/* Dropdown de notificaciones */}
-      {showNotif && incoming.length > 0 && (
+      {showNotif && (
         <div className="mt-1 w-72 max-h-80 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
           <div className="px-3 py-2 border-b text-xs font-semibold text-slate-700 bg-slate-50 flex justify-between items-center">
             <span>Mensajes recibidos</span>
@@ -259,21 +278,27 @@ export default function ChatControls() {
             </button>
           </div>
           <div className="max-h-72 overflow-y-auto text-xs">
-            {incoming.map((m) => {
-              const from = workers.find((w) => w.uid === m.fromUid);
-              const label = from?.name || from?.email || "Trabajador";
-              const preview = m.text.length > 60 ? m.text.slice(0, 57) + "..." : m.text;
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => from && openChatWith(from)}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-50 border-b last:border-b-0 border-slate-100 flex flex-col"
-                >
-                  <span className="font-semibold text-slate-800 text-[11px]">{label}</span>
-                  <span className="text-[11px] text-slate-600 mt-0.5 line-clamp-2">{preview}</span>
-                </button>
-              );
-            })}
+            {incoming.length === 0 ? (
+              <p className="px-3 py-4 text-center text-[11px] text-slate-400">
+                No hay mensajes recibidos todavía.
+              </p>
+            ) : (
+              incoming.map((m) => {
+                const from = workers.find((w) => w.uid === m.fromUid);
+                const label = from?.name || from?.email || "Trabajador";
+                const preview = m.text.length > 60 ? m.text.slice(0, 57) + "..." : m.text;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => from && openChatWith(from)}
+                    className="w-full text-left px-3 py-2 hover:bg-slate-50 border-b last:border-b-0 border-slate-100 flex flex-col"
+                  >
+                    <span className="font-semibold text-slate-800 text-[11px]">{label}</span>
+                    <span className="text-[11px] text-slate-600 mt-0.5 line-clamp-2">{preview}</span>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       )}

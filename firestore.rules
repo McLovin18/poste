@@ -59,9 +59,24 @@ service cloud.firestore {
     // Chats privados entre dos usuarios (chats/{chatId}/messages/{messageId})
     match /chats/{chatId} {
       // Documento de chat con participantes [uid1, uid2]
-      allow read, create: if isSignedIn() && request.auth.uid in request.resource.data.participants;
-      // Por simplicidad, no se permite update/delete del documento de chat desde el cliente
-      allow update, delete: if false;
+      function isChatParticipant() {
+        return isSignedIn() &&
+          request.auth.uid in resource.data.participants;
+      }
+
+      // Leer el documento de chat: solo participantes
+      allow read: if isChatParticipant();
+
+      // Crear el documento de chat: el usuario debe aparecer en la lista de participantes enviada
+      allow create: if isSignedIn() &&
+        request.resource.data.participants != null &&
+        request.auth.uid in request.resource.data.participants;
+
+      // Actualizar el documento de chat (p.ej. segundo usuario haciendo merge): solo participantes
+      allow update: if isChatParticipant();
+
+      // No se permite borrar chats desde el cliente
+      allow delete: if false;
 
       match /messages/{messageId} {
         function isParticipant() {
