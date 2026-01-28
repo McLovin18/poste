@@ -33,11 +33,51 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Chat general entre trabajadores
+    match /generalChat/{messageId} {
+      // Cualquier usuario autenticado puede leer el chat general
+      allow read: if isSignedIn();
+
+      // Crear mensajes: debe estar autenticado y el userId del mensaje
+      // debe coincidir con su propio UID
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+
+      // Actualizar/eliminar: solo el autor del mensaje o un administrador
+      allow update, delete: if isSignedIn() && (
+        request.auth.uid == resource.data.userId ||
+        isAdmin()
+      );
+    }
+
     // Contadores secuenciales (por ejemplo, counters/postes)
     match /counters/{counterId} {
       // Solo usuarios autenticados pueden leer/escribir contadores
       // (si quieres, puedes restringirlo a admin en el futuro)
       allow read, create, update: if isSignedIn();
+    }
+
+    // Chats privados entre dos usuarios (chats/{chatId}/messages/{messageId})
+    match /chats/{chatId} {
+      // Documento de chat con participantes [uid1, uid2]
+      allow read, create: if isSignedIn() && request.auth.uid in request.resource.data.participants;
+      // Por simplicidad, no se permite update/delete del documento de chat desde el cliente
+      allow update, delete: if false;
+
+      match /messages/{messageId} {
+        function isParticipant() {
+          return isSignedIn() &&
+            request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        }
+
+        // Solo los participantes pueden leer los mensajes
+        allow read: if isParticipant();
+
+        // Solo un participante puede crear mensajes, y debe coincidir fromUid con su UID
+        allow create: if isParticipant() && request.resource.data.fromUid == request.auth.uid;
+
+        // No se permite update/delete de mensajes desde el cliente (solo podrías habilitar para admin si lo necesitas)
+        allow update, delete: if false;
+      }
     }
   }
 }

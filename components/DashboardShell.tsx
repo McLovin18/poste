@@ -6,6 +6,7 @@ import Topbar from "@/components/Topbar";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import ChatWidget from "@/components/ChatWidget";
+import ChatControls from "@/components/ChatControls";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -53,7 +54,8 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </div>
         </main>
 
-        {/* Chat general flotante para todos los trabajadores autenticados */}
+        {/* Barra de chat (notificaciones + lista de trabajadores) y chat general flotante */}
+        <ChatControls />
         <ChatWidget />
       </div>
     </div>

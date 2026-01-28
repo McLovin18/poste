@@ -132,23 +132,47 @@ export default function ChatWidget() {
     <div className="fixed z-50 bottom-4 right-4 flex flex-col items-end gap-2">
       {/* Panel de chat */}
       {open && (
-        <div className="w-80 sm:w-96 h-96 bg-white shadow-xl rounded-xl border border-slate-200 flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-3 py-2 bg-[#0037A7] text-white text-sm font-semibold">
-            <span>Chat general de trabajadores</span>
+        <div className="w-80 sm:w-96 h-96 bg-white shadow-xl rounded-2xl border border-slate-200 flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-2.5 bg-[#0037A7] text-white text-base font-semibold">
+            <span>Chat equipo de trabajo</span>
             <button onClick={handleToggleOpen} className="p-1 rounded hover:bg-white/20" aria-label="Cerrar chat">
               <X size={16} />
             </button>
           </div>
-          <div className="flex-1 bg-slate-50 p-2 space-y-1 overflow-y-auto text-xs">
+          <div className="flex-1 bg-slate-50 p-3 space-y-1.5 overflow-y-auto text-sm">
             {messages.length === 0 ? (
               <p className="text-center text-gray-400 mt-4">Aún no hay mensajes. ¡Escribe el primero!</p>
             ) : (
               messages.map((m) => {
                 const label = `${m.userName || "Trabajador"}${m.role ? ` (${m.role})` : ""}`;
                 return (
-                  <div key={m.id} className="px-2 py-1 rounded-lg bg-white shadow-sm border border-slate-100">
-                    <p className="text-[11px] font-semibold text-[#0037A7] mb-0.5">{label}</p>
-                    <p className="text-[11px] whitespace-pre-wrap break-words">{m.text}</p>
+                  <div
+                    key={m.id}
+                    className={
+                      "w-full flex mb-1.5 " +
+                      (m.userId === user?.uid ? "justify-end" : "justify-start")
+                    }
+                  >
+                    <div
+                      className={
+                        "max-w-[70%] px-3 py-2 rounded-2xl text-[13px] whitespace-pre-wrap break-words shadow-sm " +
+                        (m.userId === user?.uid
+                          ? "bg-[#0037A7] text-white rounded-br-sm"
+                          : "bg-white text-slate-900 border border-slate-200 rounded-bl-sm")
+                      }
+                    >
+                      <p
+                        className={
+                          "font-semibold mb-0.5 text-[12px] " +
+                          (m.userId === user?.uid
+                            ? "text-white/80 text-right"
+                            : "text-[#0037A7]")
+                        }
+                      >
+                        {label}
+                      </p>
+                      <p>{m.text}</p>
+                    </div>
                   </div>
                 );
               })
@@ -156,7 +180,7 @@ export default function ChatWidget() {
           </div>
           <div className="border-t border-slate-200 p-2 bg-white flex flex-col gap-1">
             <textarea
-              className="w-full text-xs border border-slate-300 rounded-md px-2 py-1 resize-none focus:outline-none focus:ring-1 focus:ring-[#0037A7]"
+              className="w-full text-sm border border-slate-300 rounded-md px-2 py-1.5 resize-none focus:outline-none focus:ring-1 focus:ring-[#0037A7]"
               rows={2}
               placeholder="Escribe un mensaje..."
               value={input}
@@ -166,7 +190,7 @@ export default function ChatWidget() {
             <button
               onClick={handleSend}
               disabled={sending || !input.trim()}
-              className="self-end px-3 py-1 text-xs rounded-md bg-[#0037A7] text-white hover:bg-[#002f8e] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="self-end px-4 py-1.5 text-sm rounded-md bg-[#0037A7] text-white hover:bg-[#002f8e] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Enviar
             </button>
@@ -177,7 +201,7 @@ export default function ChatWidget() {
       {/* Botón flotante con badge de no leídos */}
       <button
         onClick={handleToggleOpen}
-        className="relative flex items-center justify-center w-12 h-12 rounded-full bg-[#0037A7] text-white shadow-lg hover:bg-[#002f8e] focus:outline-none"
+        className="relative flex items-center justify-center w-14 h-14 rounded-full bg-[#0037A7] text-white shadow-lg hover:bg-[#002f8e] focus:outline-none"
         aria-label="Abrir chat general"
       >
         {unreadCount > 0 && (
@@ -185,7 +209,7 @@ export default function ChatWidget() {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-        <MessageCircle size={22} />
+        <MessageCircle size={26} />
       </button>
     </div>
   );
